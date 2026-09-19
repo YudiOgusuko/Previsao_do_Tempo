@@ -1,10 +1,10 @@
 package br.Previsao_do_Tempo.handler.handler;
 
+import br.Previsao_do_Tempo.handler.entity.ErrorResponse;
 import br.Previsao_do_Tempo.handler.exception.NotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import br.Previsao_do_Tempo.handler.entity.ErrorResponse;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 

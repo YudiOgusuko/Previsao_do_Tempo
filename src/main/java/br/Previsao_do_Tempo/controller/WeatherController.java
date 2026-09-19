@@ -1,5 +1,6 @@
 package br.Previsao_do_Tempo.controller;
 
+import br.Previsao_do_Tempo.dto.CoordinationDto;
 import br.Previsao_do_Tempo.dto.WeatherDto;
 import br.Previsao_do_Tempo.dto.WeatherNowDto;
 import br.Previsao_do_Tempo.sevice.WeatherService;
@@ -24,12 +25,12 @@ public class WeatherController {
     private final WeatherService service;
 
     @GetMapping
-    public ResponseEntity<List<WeatherDto>> findByCidade(
+    public ResponseEntity<List<WeatherDto>> weatherWeek(
             @RequestParam
             @NotBlank(message = "O nome da cidade não pode estar em branco.")
             @Size(min = 1, max = 58, message = "O nome da cidade deve ter entre 1 e 58 caracteres.")
             String cidade) {
-        return ResponseEntity.ok().body(service.buscarPrevisaoPorCidade(cidade));
+        return ResponseEntity.ok().body(service.weatherWeek(cidade));
     }
 
     @GetMapping(value = "/now")
@@ -41,9 +42,22 @@ public class WeatherController {
         return ResponseEntity.ok().body(service.weatherNow(cidade));
     }
 
+    @GetMapping(value = "/equals")
+    public ResponseEntity<List<CoordinationDto>> getCoordination(
+            @RequestParam
+            @NotBlank(message = "O nome da cidade não pode estar em branco.")
+            @Size(min = 1, max = 85, message = "O nome da cidade deve ter entre 1 e 58 caracteres.")
+            String cidade) {
+        return ResponseEntity.ok().body(service.getCoordination(cidade));
+    }
+
     @GetMapping(value = "/all")
     public ResponseEntity<List<WeatherDto>> findAll() {
         return ResponseEntity.ok().body(service.findAll());
     }
 
+    @GetMapping(value = "/all/now")
+    public ResponseEntity<List<WeatherNowDto>> findAllNow() {
+        return ResponseEntity.ok().body(service.findAllNow());
+    }
 }

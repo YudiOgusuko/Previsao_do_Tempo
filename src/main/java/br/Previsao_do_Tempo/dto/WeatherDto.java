@@ -1,5 +1,6 @@
 package br.Previsao_do_Tempo.dto;
 
+import br.Previsao_do_Tempo.model.Weather;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Builder;
 
@@ -27,4 +28,11 @@ public record WeatherDto(String cidade,
                          String descricao,
                          LocalDate data,
                          String diaDaSemana){
+
+    public WeatherDto(Weather weather) {
+        this(weather.getCidade(), weather.getRegiao(), weather.getPais(),
+                weather.getTemperaturaMaxima(), weather.getTemperaturaMinima(), weather.getUmidade(),
+                weather.getDescricao(), weather.getData(), weather.getDiaDaSemana());
+
+    }
 }

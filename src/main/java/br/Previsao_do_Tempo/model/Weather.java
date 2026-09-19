@@ -12,7 +12,6 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@RequiredArgsConstructor
 @Builder
 public class Weather {
 
@@ -20,33 +19,19 @@ public class Weather {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NonNull
     private String cidade;
-
-    @NonNull
     private String regiao;
-
-    @NonNull
     private String pais;
 
-    @NonNull
     @Column(name = "temperatura_maxima")
     private Double temperaturaMaxima;
 
-    @NonNull
     @Column(name = "temperatura_minima")
     private Double temperaturaMinima;
 
-    @NonNull
     private Integer umidade;
-
-    @NonNull
     private String descricao;
-
-    @NonNull
     private LocalDate data;
-
-    @NonNull
     private String diaDaSemana;
 
     public Weather(WeatherDto weatherDto) {
