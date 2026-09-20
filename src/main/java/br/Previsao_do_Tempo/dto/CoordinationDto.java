@@ -16,11 +16,14 @@ import lombok.Builder;
 public record CoordinationDto(String cidade,
                               String regiao,
                               String pais,
-                              String latitude,
-                              String longitude) {
+                              Double latitude,
+                              Double longitude) {
 
     public CoordinationDto (DadosCoordination dadosCoordination) {
-        this(dadosCoordination.cidade(), dadosCoordination.regiao(), dadosCoordination.pais(),
-                dadosCoordination.latitude(), dadosCoordination.longitude());
+        this(dadosCoordination.cidade(),
+                dadosCoordination.regiao(),
+                dadosCoordination.pais(),
+                dadosCoordination.latitude(),
+                dadosCoordination.longitude());
     }
 }

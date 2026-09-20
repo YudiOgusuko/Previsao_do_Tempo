@@ -30,8 +30,13 @@ public record WeatherNowDto(String cidade,
                             String diaDaSemana) {
 
     public WeatherNowDto(WeatherNow weatherNow) {
-        this(weatherNow.getCidade(), weatherNow.getRegiao(), weatherNow.getPais(),
-                weatherNow.getTemperaturaAtual(), weatherNow.getDescricao(),
-                weatherNow.getUmidade(), LocalDateTime.ofInstant(weatherNow.getData(), ZoneId.systemDefault()), weatherNow.getDiaDaSemana());
+        this(weatherNow.getCidade(),
+                weatherNow.getRegiao(),
+                weatherNow.getPais(),
+                weatherNow.getTemperaturaAtual(),
+                weatherNow.getDescricao(),
+                weatherNow.getUmidade(),
+                weatherNow.getData() != null ? LocalDateTime.ofInstant(weatherNow.getData(), ZoneId.of("America/Sao_Paulo")) : null,
+                weatherNow.getDiaDaSemana());
     }
 }

@@ -3,6 +3,7 @@ package br.Previsao_do_Tempo.dto;
 import br.Previsao_do_Tempo.model.Weather;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
@@ -30,9 +31,15 @@ public record WeatherDto(String cidade,
                          String diaDaSemana){
 
     public WeatherDto(Weather weather) {
-        this(weather.getCidade(), weather.getRegiao(), weather.getPais(),
-                weather.getTemperaturaMaxima(), weather.getTemperaturaMinima(), weather.getUmidade(),
-                weather.getDescricao(), weather.getData(), weather.getDiaDaSemana());
-
+        this(weather.getCidade(),
+                weather.getRegiao(),
+                weather.getPais(),
+                weather.getTemperaturaMaxima(),
+                weather.getTemperaturaMinima(),
+                weather.getUmidade(),
+                weather.getDescricao(),
+                weather.getData(),
+                weather.getDiaDaSemana());
     }
+
 }

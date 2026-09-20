@@ -50,12 +50,12 @@ public class WeatherService {
 
 
     @Transactional
-    public List<WeatherDto> weatherWeek(String cidade) {
+    public List<WeatherDto> weatherWeek(String cidade, Integer dias) {
 
         String cidadeFormatoBanco = cidade.toLowerCase().replace("_", " ").trim();
         String cidadeFormatada = cidade.toLowerCase().replace(" ", "_").trim();
         LocalDate hoje = LocalDate.now();
-        LocalDate ultimoDiaPrevisao = hoje.plusDays(6);
+        LocalDate ultimoDiaPrevisao = hoje.plusDays(dias);
 
         List<WeatherDto> weatherDto = weatherRepository.findAllByCidadeIgnoreCase(cidadeFormatoBanco);
 
@@ -68,12 +68,10 @@ public class WeatherService {
         }
 
         try {
-            String urlApi = String.format("%s%s&q=%s&days=7&lang=pt", apiUrl, apiKey, cidadeFormatada);
+            String urlApi = String.format("%s%s&q=%s&days=%d&lang=pt", apiUrl, apiKey, cidadeFormatada, dias);
             DadosWeather apiWeather = restTemplate.getForObject(urlApi, DadosWeather.class);
 
-            if (apiWeather == null || apiWeather.foreCast() == null) {
-                throw new NotFoundException("Nenhum dado encontrado para a cidade: " + cidade);
-            }
+            if (apiWeather == null || apiWeather.foreCast() == null) {throw new NotFoundException("Nenhum dado encontrado para a cidade: " + cidade);}
 
             List<WeatherDto> weatherDtoList = new ArrayList<>();
 
@@ -114,12 +112,12 @@ public class WeatherService {
 
         Optional<WeatherNow> weatherNowOptional = weatherNowRepository.findByCidadeIgnoreCase(cidadeFormatoBanco);
 
-        Instant trintaMinutosAtras = Instant.now().minus(30, ChronoUnit.MINUTES);
+        Instant umaHoraAtras = Instant.now().minus(1, ChronoUnit.HOURS);
 
         if(weatherNowOptional.isPresent()) {
             WeatherNow weatherNow = weatherNowOptional.get();
-            if(weatherNow.getData().isAfter(trintaMinutosAtras)) {
-                return new WeatherNowDto(weatherNowOptional.get());
+            if(weatherNow.getData().isAfter(umaHoraAtras)) {
+                return new WeatherNowDto(weatherNow);
             }
         }
 

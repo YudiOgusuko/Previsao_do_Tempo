@@ -7,6 +7,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public record DadosCoordination(@JsonProperty("name") String cidade,
                                 @JsonProperty("region") String regiao,
                                 @JsonProperty("country") String pais,
-                                @JsonProperty("lat") String latitude,
-                                @JsonProperty("lon") String longitude) {
+                                @JsonProperty("lat") Double latitude,
+                                @JsonProperty("lon") Double longitude) {
 }

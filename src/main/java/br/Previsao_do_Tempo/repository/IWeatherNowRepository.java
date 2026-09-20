@@ -8,5 +8,4 @@ import java.util.Optional;
 public interface IWeatherNowRepository extends JpaRepository<WeatherNow, Long> {
     Optional<WeatherNow> findByCidadeIgnoreCase(String cidade);
 
-    void deleteByCidadeIgnoreCase(String cidadeFormatoBanco);
 }
