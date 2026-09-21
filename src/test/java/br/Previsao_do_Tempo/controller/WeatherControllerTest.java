@@ -70,8 +70,8 @@ class WeatherControllerTest {
     }
 
     @Test
-    @DisplayName("OK - requisição GET para previsão do tempo dos próximos dias.")
-    void weatherWeekOk() throws Exception {
+    @DisplayName("Clima Geral - GET OK.")
+    void weatherWeek_Ok() throws Exception {
 
        String cidade = "Sao Paulo";
        Integer dias = 7;
@@ -88,8 +88,8 @@ class WeatherControllerTest {
     }
 
     @Test
-    @DisplayName("ERRO - requisição GET para previsão do tempo dos próximos dias.")
-    void weatherWeekErro() throws Exception {
+    @DisplayName("Clima Geral - GET ERRO.")
+    void weatherWeek_Erro() throws Exception {
 
         String cidade = "cidade inexistente";
         Integer dias = 7;
@@ -107,8 +107,8 @@ class WeatherControllerTest {
 
 
     @Test
-    @DisplayName("OK - requisição GET para previsão do tempo atual.")
-    void weatherNowOk() throws Exception {
+    @DisplayName("Clima Atual - GET OK.")
+    void weatherNow_Ok() throws Exception {
 
         String cidade = "Santo André";
 
@@ -124,8 +124,8 @@ class WeatherControllerTest {
     }
 
     @Test
-    @DisplayName("ERRO - requisição GET para previsão do tempo atual.")
-    void weatherNowErro() throws Exception {
+    @DisplayName("Clima Atual - GET ERRO.")
+    void weatherNow_Erro() throws Exception {
 
         String cidade = "Santo André";
 
@@ -140,8 +140,8 @@ class WeatherControllerTest {
     }
 
     @Test
-    @DisplayName("OK - requisição GET para pegar coordenada da cidade.")
-    void getCoordinationOk() throws Exception {
+    @DisplayName("Coordenadas - GET OK.")
+    void getCoordination_Ok() throws Exception {
 
         String cidade = "Tokyo";
 
@@ -156,8 +156,8 @@ class WeatherControllerTest {
     }
 
     @Test
-    @DisplayName("ERRO - requisição GET para pegar coordenada da cidade.")
-    void getCoordinationErro() throws Exception {
+    @DisplayName("Coordenadas - GET ERRO.")
+    void getCoordination_Erro() throws Exception {
 
         String cidade = "Tokyo";
 
@@ -172,8 +172,8 @@ class WeatherControllerTest {
     }
 
     @Test
-    @DisplayName("OK - requisição findAll previsão do tempo geral.")
-    void findAllOk() throws Exception {
+    @DisplayName("Clima Atual - findAll OK.")
+    void findAll_Ok() throws Exception {
 
         given(service.findAll())
                 .willReturn(List.of(WeatherDto.builder().build()));
@@ -185,8 +185,8 @@ class WeatherControllerTest {
     }
 
     @Test
-    @DisplayName("ERRO - requisição findAll previsão do tempo geral.")
-    void findAllErro() throws Exception {
+    @DisplayName("Clima Geral - findAll ERRO.")
+    void findAll_Erro() throws Exception {
 
         given(service.findAll())
                 .willThrow(new NotFoundException("Nenhum dado foi encontrado."));
@@ -198,8 +198,8 @@ class WeatherControllerTest {
     }
 
     @Test
-    @DisplayName("Ok - requisição findAll previsão do tempo atual.")
-    void findAllNowOk() throws Exception {
+    @DisplayName("Clima Atual - findAll OK.")
+    void findAllNow_Ok() throws Exception {
 
         given(service.findAllNow())
                 .willReturn(List.of(WeatherNowDto.builder().build()));
@@ -211,8 +211,8 @@ class WeatherControllerTest {
     }
 
     @Test
-    @DisplayName("ERRO - requisição findAll previsão do tempo atual.")
-    void findAllNowErro() throws Exception {
+    @DisplayName("Clima Atual - findAll ERRO.")
+    void findAllNow_Erro() throws Exception {
 
         given(service.findAllNow())
                 .willThrow(new NotFoundException("Nenhum dado foi encontrado."));

@@ -2,7 +2,9 @@ package br.Previsao_do_Tempo.dto.dadosWeather;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 
+@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record DadosDay(@JsonProperty("maxtemp_c") Double temperatura_maxima,
                        @JsonProperty("mintemp_c") Double temperatura_minima,

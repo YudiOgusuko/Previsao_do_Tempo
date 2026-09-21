@@ -3,7 +3,6 @@ package br.Previsao_do_Tempo.dto;
 import br.Previsao_do_Tempo.model.Weather;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Builder;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 

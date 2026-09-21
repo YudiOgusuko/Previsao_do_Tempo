@@ -36,7 +36,7 @@ public record WeatherNowDto(String cidade,
                 weatherNow.getTemperaturaAtual(),
                 weatherNow.getDescricao(),
                 weatherNow.getUmidade(),
-                weatherNow.getData() != null ? LocalDateTime.ofInstant(weatherNow.getData(), ZoneId.of("America/Sao_Paulo")) : null,
+                weatherNow.getData() != null ? LocalDateTime.ofInstant(weatherNow.getData(), ZoneId.of("America/Sao_Paulo")) : LocalDateTime.now(),
                 weatherNow.getDiaDaSemana());
     }
 }

@@ -2,9 +2,9 @@ package br.Previsao_do_Tempo.dto.dadosWeatherNow;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 
-import java.time.LocalDateTime;
-
+@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record DadosCurrentNow(@JsonProperty("temp_c") Double temperaturaAtual,
                               @JsonProperty("condition") DadosConditionNow condition,

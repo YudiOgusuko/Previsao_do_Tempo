@@ -33,8 +33,6 @@ public class WeatherNow {
 
     private String diaDaSemana;
 
-    ZoneId zoneIdBrasil = ZoneId.of("America/Sao_Paulo");
-
     public void atualizarDados(DadosWeatherNow api, String diaDaSemana) {
         setCidade(api.location().cidade());
         setRegiao(api.location().regiao());
@@ -42,7 +40,7 @@ public class WeatherNow {
         setTemperaturaAtual(api.current().temperaturaAtual());
         setDescricao(api.current().condition().descricao());
         setUmidade(api.current().umidade());
-        setData(api.location().dataEHorario().atZone(zoneIdBrasil).toInstant());
+        setData(api.location().dataEHorario().atZone(ZoneId.of("America/Sao_Paulo")).toInstant());
         setDiaDaSemana(diaDaSemana);
     }
 }
