@@ -17,6 +17,7 @@ spring:
 
 weather:
   api:
-    key: ${API_KEY}
+    key: ${WEATHER_API_KEY}
     url: ${API_URL}
     url_now: ${API_URL_NOW}
+    url_coordination: ${API_URL_COORDINATION}

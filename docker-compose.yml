@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:14.24-alpine3.24
+    container_name: previsao_do_tempo_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${USERNAME_POSTGRES}
+      POSTGRES_PASSWORD: ${PASSWORD_POSTGRES}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - previsao_network
+
+  previsao_do_tempo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: previsao_do_tempo_app
+    restart: unless-stopped
+    ports:
+      - "8085:8080"
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - previsao_network
+
+volumes:
+  postgres_data:
+
+networks:
+  previsao_network:
+    driver: bridge
+

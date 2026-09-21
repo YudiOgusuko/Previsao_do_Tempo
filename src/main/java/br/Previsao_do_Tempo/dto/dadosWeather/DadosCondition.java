@@ -1,8 +1,10 @@
-package br.Previsao_do_Tempo.dto;
+package br.Previsao_do_Tempo.dto.dadosWeather;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 
+@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record DadosConditionNow(@JsonProperty("text") String descricao) {
+public record DadosCondition(@JsonProperty("text") String descricao) {
 }

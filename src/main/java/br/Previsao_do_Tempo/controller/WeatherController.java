@@ -1,10 +1,10 @@
 package br.Previsao_do_Tempo.controller;
 
+import br.Previsao_do_Tempo.dto.CoordinationDto;
 import br.Previsao_do_Tempo.dto.WeatherDto;
 import br.Previsao_do_Tempo.dto.WeatherNowDto;
 import br.Previsao_do_Tempo.sevice.WeatherService;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -24,12 +24,18 @@ public class WeatherController {
     private final WeatherService service;
 
     @GetMapping
-    public ResponseEntity<List<WeatherDto>> findByCidade(
+    public ResponseEntity<List<WeatherDto>> weatherWeek(
             @RequestParam
             @NotBlank(message = "O nome da cidade não pode estar em branco.")
             @Size(min = 1, max = 58, message = "O nome da cidade deve ter entre 1 e 58 caracteres.")
-            String cidade) {
-        return ResponseEntity.ok().body(service.buscarPrevisaoPorCidade(cidade));
+            String cidade,
+
+            @RequestParam
+            @NotNull(message = "O número de dias não pode estar em branco.")
+            @Min(value = 1, message = "O número mínimo de dias é 1.")
+            @Max(value = 14, message = "O número mínimo de dias é 14.")
+            Integer dias) {
+        return ResponseEntity.ok().body(service.weatherWeek(cidade, dias));
     }
 
     @GetMapping(value = "/now")
@@ -41,9 +47,22 @@ public class WeatherController {
         return ResponseEntity.ok().body(service.weatherNow(cidade));
     }
 
+    @GetMapping(value = "/coordination")
+    public ResponseEntity<List<CoordinationDto>> getCoordination(
+            @RequestParam
+            @NotBlank(message = "O nome da cidade não pode estar em branco.")
+            @Size(min = 1, max = 85, message = "O nome da cidade deve ter entre 1 e 58 caracteres.")
+            String cidade) {
+        return ResponseEntity.ok().body(service.getCoordination(cidade));
+    }
+
     @GetMapping(value = "/all")
     public ResponseEntity<List<WeatherDto>> findAll() {
         return ResponseEntity.ok().body(service.findAll());
     }
 
+    @GetMapping(value = "/all/now")
+    public ResponseEntity<List<WeatherNowDto>> findAllNow() {
+        return ResponseEntity.ok().body(service.findAllNow());
+    }
 }

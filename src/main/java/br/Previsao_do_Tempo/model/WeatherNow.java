@@ -1,10 +1,12 @@
 package br.Previsao_do_Tempo.model;
 
+import br.Previsao_do_Tempo.dto.dadosWeatherNow.DadosWeatherNow;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZoneId;
 
 @Entity
 @Table(name = "tb_weatherNow")
@@ -27,7 +29,18 @@ public class WeatherNow {
     private Integer umidade;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime data;
+    private Instant data;
 
     private String diaDaSemana;
+
+    public void atualizarDados(DadosWeatherNow api, String diaDaSemana) {
+        setCidade(api.location().cidade());
+        setRegiao(api.location().regiao());
+        setPais(api.location().pais());
+        setTemperaturaAtual(api.current().temperaturaAtual());
+        setDescricao(api.current().condition().descricao());
+        setUmidade(api.current().umidade());
+        setData(api.location().dataEHorario().atZone(ZoneId.of("America/Sao_Paulo")).toInstant());
+        setDiaDaSemana(diaDaSemana);
+    }
 }
