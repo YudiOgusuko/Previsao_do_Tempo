@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface IWeatherNowRepository extends JpaRepository<WeatherNow, Long> {
-    Optional<WeatherNow> findByCidadeIgnoreCase(String cidade);
 
+    Optional<WeatherNow> findAllByCidadeAndRegiaoAndPaisIgnoreCase(String cidadeFormatada, String regiaoFormatada, String paisFormatado);
 }

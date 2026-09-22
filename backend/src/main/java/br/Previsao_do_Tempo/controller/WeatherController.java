@@ -3,9 +3,9 @@ package br.Previsao_do_Tempo.controller;
 import br.Previsao_do_Tempo.dto.CoordinationDto;
 import br.Previsao_do_Tempo.dto.WeatherDto;
 import br.Previsao_do_Tempo.dto.WeatherNowDto;
-import br.Previsao_do_Tempo.dto.dadosCoordination.DadosCoordination;
 import br.Previsao_do_Tempo.sevice.WeatherService;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -30,12 +30,18 @@ public class WeatherController {
             @NotBlank(message = "O nome da cidade não pode estar em branco.")
             @Size(min = 1, max = 58, message = "O nome da cidade deve ter entre 1 e 58 caracteres.")
             String cidade,
+
             @RequestParam
-            @NotNull(message = "O número de dias não pode estar em branco.")
-            @Min(value = 1, message = "O número mínimo de dias é 1.")
-            @Max(value = 14, message = "O número mínimo de dias é 14.")
+            @NotBlank(message = "A região não pode estar em branco.")
+            String regiao,
+
+            @RequestParam
+            @NotBlank(message = "O país não pode estar em branco.")
+            String pais,
+
+            @RequestParam
             Integer dias) {
-        return ResponseEntity.ok().body(service.weatherWeek(cidade, dias));
+        return ResponseEntity.ok().body(service.weatherWeek(cidade, regiao, pais, dias));
     }
 
     @GetMapping(value = "/now")
@@ -43,15 +49,23 @@ public class WeatherController {
             @RequestParam
             @NotBlank(message = "O nome da cidade não pode estar em branco.")
             @Size(min = 1, max = 58, message = "O nome da cidade deve ter entre 1 e 58 caracteres.")
-            String cidade) {
-        return ResponseEntity.ok().body(service.weatherNow(cidade));
+            String cidade,
+
+            @RequestParam
+            @NotBlank(message = "A região não pode estar em branco.")
+            String regiao,
+
+            @RequestParam
+            @NotBlank(message = "O país não pode estar em branco.")
+            String pais) {
+        return ResponseEntity.ok().body(service.weatherNow(cidade, regiao, pais));
     }
 
     @GetMapping(value = "/coordination")
     public ResponseEntity<List<CoordinationDto>> getCoordination(
             @RequestParam
             @NotBlank(message = "O nome da cidade não pode estar em branco.")
-            @Size(min = 1, max = 85, message = "O nome da cidade deve ter entre 1 e 58 caracteres.")
+            @Size(min = 1, max = 58, message = "O nome da cidade deve ter entre 1 e 58 caracteres.")
             String cidade) {
         return ResponseEntity.ok().body(service.getCoordination(cidade));
     }

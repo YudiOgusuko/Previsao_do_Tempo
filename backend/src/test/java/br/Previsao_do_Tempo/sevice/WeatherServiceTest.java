@@ -32,8 +32,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -56,6 +55,8 @@ class WeatherServiceTest {
     private RestTemplate restTemplate;
 
     private final String cidade = "Sao Paulo";
+    private final String regiao = "Sao Paulo";
+    private final String pais = "Brazil";
     private final Integer dias = 7;
 
     @BeforeEach
@@ -73,15 +74,17 @@ class WeatherServiceTest {
         LocalDate hoje = LocalDate.now();
         LocalDate diaLimite = hoje.plusDays(dias);
 
-        WeatherDto dtoExistente = WeatherDto.builder()
+        Weather weather = Weather.builder()
                 .cidade(cidade)
+                .regiao(regiao)
+                .pais(pais)
                 .data(diaLimite)
                 .build();
 
-        given(iWeatherRepository.findAllByCidadeIgnoreCase(anyString()))
-                .willReturn(List.of(dtoExistente));
+        given(iWeatherRepository.findAllByCidadeAndRegiaoAndPaisIgnoreCase(anyString(), anyString(), anyString()))
+                .willReturn(List.of(weather));
 
-        List<WeatherDto> lista = service.weatherWeek(cidade, dias);
+        List<WeatherDto> lista = service.weatherWeek(cidade, regiao, pais, dias);
 
         assertThat(lista.isEmpty()).isFalse();
         then(restTemplate).should(never()).getForObject(anyString(), any());
@@ -92,23 +95,35 @@ class WeatherServiceTest {
     @Test
     @DisplayName("Clima Geral - Deve buscar na API e salvar no Banco quando não tem a previsão completa.")
     void weatherWeek_API() {
-        given(iWeatherRepository.findAllByCidadeIgnoreCase(anyString()))
-                .willReturn(List.of());
-
         DadosCondition condition = DadosCondition.builder().descricao("Ensolarado").build();
         DadosDay day = DadosDay.builder().temperatura_maxima(30.0).temperatura_minima(20.0).umidade(60).condition(condition).build();
         DadosForeCastDay dadosForeCastDay = DadosForeCastDay.builder().data(LocalDate.now()).day(day).build();
         DadosForeCast foreCast = DadosForeCast.builder().dadosForeCastDay(List.of(dadosForeCastDay)).build();
-        DadosLocation location = DadosLocation.builder().cidade(cidade).regiao("SP").pais("Brasil").build();
-
+        DadosLocation location = DadosLocation.builder().cidade(cidade).regiao(regiao).pais(pais).build();
         DadosWeather dadosWeather = DadosWeather.builder().location(location).foreCast(foreCast).build();
+
+        DadosCoordination dadosCoordination = DadosCoordination.builder()
+                .cidade(cidade)
+                .regiao(regiao)
+                .pais(pais)
+                .latitude(-23.55)
+                .longitude(-46.63).build();
+
+        DadosCoordination[] arrayCoordenadas = new DadosCoordination[]{ dadosCoordination };
+
+        given(iWeatherRepository.findAllByCidadeAndRegiaoAndPaisIgnoreCase(anyString(), anyString(), anyString()))
+                .willReturn(List.of());
+
+        given(restTemplate.getForObject(anyString(), eq(DadosCoordination[].class)))
+                .willReturn(arrayCoordenadas);
 
         given(restTemplate.getForObject(anyString(), eq(DadosWeather.class)))
                 .willReturn(dadosWeather);
 
-        List<WeatherDto> list = service.weatherWeek(cidade, dias);
+        List<WeatherDto> list = service.weatherWeek(cidade, regiao, pais, dias);
 
-        assertThat(list.isEmpty()).isFalse();
+        assertNotNull(list);
+        assertFalse(list.isEmpty());
         then(iWeatherRepository).should().deleteByCidadeIgnoreCase(anyString());
         then(iWeatherRepository).should().saveAll(anyList());
     }
@@ -116,13 +131,13 @@ class WeatherServiceTest {
     @Test
     @DisplayName("Clima Geral - Deve lançar exceção NotFoundException quando a API não retornar dados.")
     void weatherWeek_Exception() {
-        given(iWeatherRepository.findAllByCidadeIgnoreCase(anyString()))
+        given(iWeatherRepository.findAllByCidadeAndRegiaoAndPaisIgnoreCase(anyString(), anyString(), anyString()))
                 .willReturn(List.of());
 
         given(restTemplate.getForObject(anyString(), any()))
                 .willReturn(null);
 
-        assertThrows(NotFoundException.class, () -> service.weatherWeek(cidade, dias));
+        assertThrows(NotFoundException.class, () -> service.weatherWeek(cidade, regiao, pais, dias));
     }
 
     @Test
@@ -136,49 +151,60 @@ class WeatherServiceTest {
                 .data(Instant.now())
                 .build();
 
-        given(iWeatherNowRepository.findByCidadeIgnoreCase(anyString()))
+        given(iWeatherNowRepository.findAllByCidadeAndRegiaoAndPaisIgnoreCase(anyString(), anyString(), anyString()))
                 .willReturn(Optional.of(weatherNow));
 
-        WeatherNowDto weatherNowDto = service.weatherNow(cidade);
+        WeatherNowDto weatherNowDto = service.weatherNow(cidade, regiao, pais);
 
         assertNotNull(weatherNowDto);
-        then(iWeatherNowRepository).should().findByCidadeIgnoreCase(anyString());
+        then(iWeatherNowRepository).should().findAllByCidadeAndRegiaoAndPaisIgnoreCase(anyString(), anyString(), anyString());
     }
 
     @Test
     @DisplayName("Clima Atual - Deve ser retornado da API.")
     void weatherNow_API() {
-
         DadosConditionNow condition = DadosConditionNow.builder().descricao("Encoberto").build();
         DadosCurrentNow current = DadosCurrentNow.builder().temperaturaAtual(25.5).condition(condition).umidade(64).build();
         DadosLocationNow location = DadosLocationNow.builder().cidade("Santo André").regiao("Sao Paulo").pais("Brazil").dataEHorario(LocalDateTime.now()).build();
 
+        DadosCoordination dadosCoordination = DadosCoordination.builder()
+                .cidade(cidade)
+                .regiao(regiao)
+                .pais(pais)
+                .latitude(-23.55)
+                .longitude(-46.63).build();
+
+        DadosCoordination[] arrayCoordenadas = new DadosCoordination[]{ dadosCoordination };
+
         DadosWeatherNow dadosWeatherNow = DadosWeatherNow.builder().location(location).current(current).build();
 
-        given(iWeatherNowRepository.findByCidadeIgnoreCase(anyString()))
+        given(iWeatherNowRepository.findAllByCidadeAndRegiaoAndPaisIgnoreCase(anyString(), anyString(), anyString()))
                 .willReturn(Optional.empty());
+
+        given(restTemplate.getForObject(anyString(), eq(DadosCoordination[].class)))
+                .willReturn(arrayCoordenadas);
 
         given(restTemplate.getForObject(anyString(), eq(DadosWeatherNow.class)))
                 .willReturn(dadosWeatherNow);
 
-        WeatherNowDto weatherNowDto = service.weatherNow(cidade);
+        WeatherNowDto weatherNowDto = service.weatherNow(cidade, regiao, pais);
 
         assertNotNull(weatherNowDto);
         then(restTemplate).should().getForObject(anyString(), eq(DadosWeatherNow.class));
-        then(iWeatherNowRepository).should().findByCidadeIgnoreCase(anyString());
+        then(iWeatherNowRepository).should().findAllByCidadeAndRegiaoAndPaisIgnoreCase(anyString(), anyString(), anyString());
     }
 
     @Test
     @DisplayName("Clima Atual - Deve lançar exceção.")
     void weatherNow_Exception() {
 
-        given(iWeatherNowRepository.findByCidadeIgnoreCase(anyString()))
+        given(iWeatherNowRepository.findAllByCidadeAndRegiaoAndPaisIgnoreCase(anyString(), anyString(), anyString()))
                 .willReturn(Optional.empty());
 
         given(restTemplate.getForObject(anyString(), eq(DadosWeatherNow.class)))
                 .willReturn(null);
 
-        assertThrows(NotFoundException.class, () ->  service.weatherNow(cidade));
+        assertThrows(Exception.class, () ->  service.weatherNow(cidade, regiao, pais));
 
     }
 
@@ -205,6 +231,31 @@ class WeatherServiceTest {
                 .willReturn(null);
 
         assertThrows(NotFoundException.class, () -> service.getCoordination(cidade));
+    }
+
+    @Test
+    @DisplayName("Listar cidades com iniciais iguais - OK")
+    void search_OK() {
+
+        DadosCoordination[] dadosCoordinations = new DadosCoordination[]{DadosCoordination.builder().build()};
+
+        given(restTemplate.getForObject(anyString(), eq(DadosCoordination[].class)))
+                .willReturn(dadosCoordinations);
+
+        var coordinationDtoList = service.search(cidade);
+
+        assertNotNull(coordinationDtoList);
+        then(restTemplate).should().getForObject(anyString(), any());
+    }
+
+    @Test
+    @DisplayName("Listar cidades com iniciais iguais - ERRO")
+    void search_Erro() {
+
+        given(restTemplate.getForObject(anyString(), eq(DadosCoordination[].class)))
+                .willThrow(new NotFoundException("Nenhum dado foi encontrado."));
+
+        assertThrows(NotFoundException.class, () ->  service.search(cidade));
     }
 
     @Test

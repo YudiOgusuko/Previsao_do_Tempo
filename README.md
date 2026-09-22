@@ -4,13 +4,14 @@
 ![Spring Boot 3.x](https://img.shields.io/badge/Spring_Boot-3.x-green?style=flat-square&logo=springboot)
 ![Status](https://img.shields.io/badge/Status-Conclu%C3%ADdo-brightgreen?style=flat-square)
 
-Projeto full-stack de consulta de previsão do tempo, desenvolvido por Victor Yudi Ogusuko como projeto de portfólio, com foco principal em back-end Java.
+
+Projeto full-stack de consulta de previsão do tempo com foco principal em back-end Java.  
+O projeto permite consultar o clima atual ou a previsão dos próximos dias (1 a 14) de qualquer cidade do mundo.
 
 ---
 
 ## 🎯 Objetivo
 
-O projeto permite consultar o clima atual ou a previsão dos próximos dias (1 a 14) de qualquer cidade do mundo. O objetivo é praticar, num projeto completo e não trivial:
 
 Consumo de API externa (WeatherAPI)
 Modelagem de DTOs e tratamento de erros de uma API REST
@@ -72,7 +73,7 @@ Como front-end e back-end rodam em origens diferentes durante o desenvolvimento 
 ---
 ## 🧰 Tecnologias e ferramentas
 
-- **Back-end**: Java, Spring Boot, Spring Web, Spring Data JPA, Bean Validation (`jakarta.validation`), RestTemplate (consumo da WeatherAPI)
+- **Back-end**: Java, Spring Boot, Spring Web, Spring Data JPA, Bean Validation, RestTemplate (consumo da WeatherAPI)
 - **Banco de dados**: PostgreSQL
 - **Front-end**: HTML, CSS, JavaScript (sem frameworks)
 - **Infraestrutura**: Docker, Docker Compose
@@ -83,23 +84,24 @@ Como front-end e back-end rodam em origens diferentes durante o desenvolvimento 
 O projeto sobe em dois containers via Docker Compose:
 
 - **db**: PostgreSQL, com dados persistidos em um volume Docker.
-- **app**: a aplicação Spring Boot (`previsao_do_tempo`), construída a partir do `Dockerfile` do projeto.
-> Confira o `docker-compose.yml` do seu projeto para confirmar os nomes exatos dos serviços e as portas mapeadas — os exemplos abaixo assumem `app` na porta `8080` e `db` na porta `5432`, que são os valores mais comuns.
+- **app**: A aplicação Spring Boot (`previsao_do_tempo`), construída a partir do `Dockerfile` do projeto.    
 
-### Como executar (Docker)
+Confira o `docker-compose.yml` do seu projeto para confirmar os nomes exatos dos serviços e as portas mapeadas. Os exemplos abaixo assumem `app` na porta `8080` e `db` na porta `5432`, que são os valores mais comuns.
+
+## ▶️ Como executar (Docker)
 
 1. Clone o repositório.
-2. Copie o arquivo `.env.example` para `.env` e preencha os valores (chave da WeatherAPI, credenciais do banco — veja a seção seguinte).
+2. Copie o arquivo `.env.example` para `.env` e preencha os valores (chave da WeatherAPI, credenciais do banco, etc).
 3. Na raiz do projeto, rode:
 ```bash
    docker-compose up --build
 ```
 4. Aguarde os logs mostrarem que a aplicação Spring Boot subiu (procure por `Started PrevisaoDoTempoApplication`).
-5. Teste o back-end em `http://localhost:8080/api/clima/now?cidade=-23.5505,-46.6333` (ou importe a coleção `previsao-do-tempo.postman_collection.json` no Postman/Insomnia).
+5. Teste o back-end importando a coleção `previsao-do-tempo.postman_collection.json` no Postman/Insomnia.
 6. Abra `previsao-do-tempo-frontend/index.html` com a extensão **Live Server** do VS Code para usar a interface completa.
    Para rodar em segundo plano: `docker-compose up --build -d`. Para parar: `docker-compose down` (adicione `-v` para também apagar o volume do banco).
 
-### Erro "port is already allocated"
+### ❌ Erro "port is already allocated"
 
 Se ao rodar `docker-compose up` aparecer um erro como:
 
@@ -109,12 +111,13 @@ Error response from daemon: driver failed programming external connectivity on e
 
 Isso significa que outro processo (ou outro container) já está usando a porta `8080` (aplicação) ou `5432` (PostgreSQL) na sua máquina. Duas formas de resolver:
 
-**Opção 1 — liberar a porta**
+**🔸Opção 1 — liberar a porta**
 Descubra o que está usando a porta e finalize o processo:
 - Windows (PowerShell): `netstat -ano | findstr :8080` (ou `:5432`), depois `taskkill /PID <pid> /F`
 - Linux/Mac: `lsof -i :8080` (ou `:5432`), depois `kill -9 <pid>`
-- Se for outro container Docker: `docker ps` para achar o nome, depois `docker stop <nome>`
-  **Opção 2 — mudar a porta usada localmente**
+- Se for outro container Docker: `docker ps` para achar o nome, depois `docker stop <nome>`  
+
+**🔸Opção 2 — mudar a porta usada localmente**
   No `docker-compose.yml`, altere apenas o lado esquerdo do mapeamento de portas (a porta do seu computador; a da direita, dentro do container, não precisa mudar):
 ```yaml
 ports:

@@ -3,8 +3,10 @@ const ENDPOINTS = {
   search:       (q) => `${API_BASE}/search?q=${encodeURIComponent(q)}`,
   coordination: (cidade, estado, pais) =>
     `${API_BASE}/coordination?cidade=${encodeURIComponent(cidade)}&estado=${encodeURIComponent(estado)}&pais=${encodeURIComponent(pais)}`,
-  week:  (localizacao, dias) => `${API_BASE}?cidade=${encodeURIComponent(localizacao)}&dias=${dias}`,
-  now:   (localizacao) => `${API_BASE}/now?cidade=${encodeURIComponent(localizacao)}`,
+  week:  (cidade, regiao, pais, dias) =>
+    `${API_BASE}?cidade=${encodeURIComponent(cidade)}&regiao=${encodeURIComponent(regiao)}&pais=${encodeURIComponent(pais)}&dias=${dias}`,
+  now:   (cidade, regiao, pais) =>
+    `${API_BASE}/now?cidade=${encodeURIComponent(cidade)}&regiao=${encodeURIComponent(regiao)}&pais=${encodeURIComponent(pais)}`,
 };
 
 
@@ -271,14 +273,10 @@ function formatDate(value){
   return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 }
 
-
 const btnBuscar = document.getElementById('btnBuscar');
 const btnAtual  = document.getElementById('btnAtual');
 const btnDemo   = document.getElementById('btnDemo');
 
-function localizacaoParaConsulta(){
-  return `${selectedCity.latitude},${selectedCity.longitude}`;
-}
 
 async function withLoading(btn, fn){
   const original = btn.textContent;
@@ -294,7 +292,7 @@ btnBuscar.addEventListener('click', () => withLoading(btnBuscar, async () => {
   if (!selectedCity){ showError('Selecione uma cidade na lista de sugestões.'); return; }
   if (!selectedDays){ showError('Selecione a quantidade de dias (1 a 14).'); return; }
   try{
-    const res = await fetch(ENDPOINTS.week(localizacaoParaConsulta(), selectedDays));
+    const res = await fetch(ENDPOINTS.week(selectedCity.cidade, selectedCity.estado, selectedCity.pais, selectedDays));
     if (!res.ok) throw new Error('week-failed');
     const data = await res.json();
     renderWeek(data);
@@ -307,7 +305,7 @@ btnAtual.addEventListener('click', () => withLoading(btnAtual, async () => {
   clearError();
   if (!selectedCity){ showError('Selecione uma cidade na lista de sugestões.'); return; }
   try{
-    const res = await fetch(ENDPOINTS.now(localizacaoParaConsulta()));
+    const res = await fetch(ENDPOINTS.now(selectedCity.cidade, selectedCity.estado, selectedCity.pais));
     if (!res.ok) throw new Error('now-failed');
     const data = await res.json();
     renderNow(data);
