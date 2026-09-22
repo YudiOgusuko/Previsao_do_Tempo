@@ -3,9 +3,9 @@ package br.Previsao_do_Tempo.controller;
 import br.Previsao_do_Tempo.dto.CoordinationDto;
 import br.Previsao_do_Tempo.dto.WeatherDto;
 import br.Previsao_do_Tempo.dto.WeatherNowDto;
+import br.Previsao_do_Tempo.handler.exception.BadRequestException;
 import br.Previsao_do_Tempo.handler.exception.NotFoundException;
 import br.Previsao_do_Tempo.sevice.WeatherService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.BDDMockito.given;
@@ -31,57 +29,23 @@ class WeatherControllerTest {
     @MockitoBean
     private WeatherService service;
 
-    private WeatherDto weatherDto;
-    private WeatherNowDto weatherNowDto;
-    private CoordinationDto coordinationDto;
-
-    @BeforeEach
-    void setUp(){
-        weatherDto = WeatherDto.builder()
-                .cidade("Sao Paulo")
-                .regiao("Sao Paulo")
-                .pais("Brazil")
-                .temperaturaMaxima(21.3)
-                .temperaturaMinima(17.6)
-                .umidade(78)
-                .descricao("Encoberto")
-                .data(LocalDate.now())
-                .diaDaSemana("Domingo")
-                .build();
-
-        weatherNowDto = WeatherNowDto.builder()
-                .cidade("Santo André")
-                .regiao("Santo André")
-                .pais("Brazil")
-                .temperaturaAtual(15.2)
-                .descricao("Chuva irregular nas proximidades")
-                .umidade(81)
-                .data(LocalDateTime.now())
-                .diaDaSemana("Domingo")
-                .build();
-
-        coordinationDto = CoordinationDto.builder()
-                .cidade("Tokyo")
-                .regiao("Tokyo")
-                .pais("Japan")
-                .latitude(35.69)
-                .longitude(139.60)
-                .build();
-    }
-
     @Test
     @DisplayName("Clima Geral - GET OK.")
     void weatherWeek_Ok() throws Exception {
 
        String cidade = "Sao Paulo";
+       String regiao = "Sao Paulo";
+       String pais = "Brazil";
        Integer dias = 7;
 
-       given(service.weatherWeek(cidade, dias))
-               .willReturn(List.of(weatherDto));
+       given(service.weatherWeek(cidade, regiao, pais, dias))
+               .willReturn(List.of(WeatherDto.builder().build()));
 
        mockMvc.perform(
                get("/api/clima")
                        .param("cidade", cidade)
+                       .param("regiao", regiao)
+                       .param("pais", pais)
                        .param("dias", String.valueOf(dias))
                        .contentType(MediaType.APPLICATION_JSON)
        ).andExpect(status().isOk());
@@ -92,17 +56,19 @@ class WeatherControllerTest {
     void weatherWeek_Erro() throws Exception {
 
         String cidade = "cidade inexistente";
+        String regiao = "região errada";
+        String pais = "pais estranho";
         Integer dias = 7;
 
-        given(service.weatherWeek(cidade, dias))
-                .willThrow(new NotFoundException("Cidade não encontrada."));
+        given(service.weatherWeek(cidade, regiao, pais, dias))
+                .willThrow(new BadRequestException("Os dados fornecidos são inválidos."));
 
         mockMvc.perform(
                 get("/api/clima")
                         .param("cidade", cidade)
                         .param("dias", String.valueOf(dias))
                         .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isNotFound());
+        ).andExpect(status().isBadRequest());
     }
 
 
@@ -111,13 +77,17 @@ class WeatherControllerTest {
     void weatherNow_Ok() throws Exception {
 
         String cidade = "Santo André";
+        String regiao = "Sao Paulo";
+        String pais = "Brazil";
 
-        given(service.weatherNow(cidade))
-                .willReturn(weatherNowDto);
+        given(service.weatherNow(cidade, regiao, pais))
+                .willReturn(WeatherNowDto.builder().build());
 
         mockMvc.perform(
                 get("/api/clima/now")
                         .param("cidade", cidade)
+                        .param("regiao", regiao)
+                        .param("pais", pais)
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk());
 
@@ -128,15 +98,17 @@ class WeatherControllerTest {
     void weatherNow_Erro() throws Exception {
 
         String cidade = "Santo André";
+        String regiao = "Sao Paulo";
+        String pais = "Brazil";
 
-        given(service.weatherNow(cidade))
-                .willThrow(new NotFoundException("Cidade não encontrada."));
+        given(service.weatherNow(cidade, regiao, pais))
+                .willThrow(new BadRequestException("Os dados fornecidos são inválidos."));
 
         mockMvc.perform(
                 get("/api/clima/now")
                         .param("cidade", cidade)
                         .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isNotFound());
+        ).andExpect(status().isBadRequest());
     }
 
     @Test
@@ -146,7 +118,7 @@ class WeatherControllerTest {
         String cidade = "Tokyo";
 
         given(service.getCoordination(cidade))
-                .willReturn(List.of(coordinationDto));
+                .willReturn(List.of(CoordinationDto.builder().build()));
 
         mockMvc.perform(
                 get("/api/clima/coordination")
@@ -172,7 +144,39 @@ class WeatherControllerTest {
     }
 
     @Test
-    @DisplayName("Clima Atual - findAll OK.")
+    @DisplayName("Listar cidades com inicias iguais - GET OK.")
+    void search_OK() throws Exception {
+        String inicial_cidade = "Sao";
+
+        given(service.search(inicial_cidade))
+                .willReturn(List.of(CoordinationDto.builder().build()));
+
+        mockMvc.perform(
+                get("/api/clima/search")
+                        .param("q", inicial_cidade)
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
+
+    }
+
+    @Test
+    @DisplayName("Listar cidades com inicias iguais - GET ERRO.")
+    void search_Erro() throws Exception {
+        String inicial_cidade = "Sao";
+
+        given(service.search(inicial_cidade))
+                .willThrow(new NotFoundException("Nenhuma dado foi encontrado."));
+
+        mockMvc.perform(
+                get("/api/clima/search")
+                        .param("q", inicial_cidade)
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isNotFound());
+
+    }
+
+    @Test
+    @DisplayName("Clima Geral - findAll OK.")
     void findAll_Ok() throws Exception {
 
         given(service.findAll())

@@ -48,16 +48,17 @@ public class WeatherService {
     private final IWeatherNowRepository weatherNowRepository;
     private final RestTemplate restTemplate;
 
-
     @Transactional
-    public List<WeatherDto> weatherWeek(String cidade, Integer dias) {
+    public List<WeatherDto> weatherWeek(String cidade, String regiao, String pais, Integer dias) {
 
-        String cidadeFormatoBanco = cidade.toLowerCase().replace("_", " ").trim();
-        String cidadeFormatada = cidade.toLowerCase().replace(" ", "_").trim();
+        String cidadeFormatada = formatoBanco(cidade);
+        String regiaoFormatada = formatoBanco(regiao);
+        String paisFormatado = formatoBanco(pais);
+
         LocalDate hoje = LocalDate.now();
         LocalDate ultimoDiaPrevisao = hoje.plusDays(dias);
 
-        List<WeatherDto> weatherDto = weatherRepository.findAllByCidadeIgnoreCase(cidadeFormatoBanco);
+        List<WeatherDto> weatherDto = weatherRepository.findAllByCidadeAndRegiaoAndPaisIgnoreCase(cidadeFormatada, regiaoFormatada, paisFormatado).stream().map(WeatherDto::new).toList();
 
         boolean possuiPrevisaoCompleta = weatherDto.stream().anyMatch(d -> d.data().isEqual(ultimoDiaPrevisao));
 
@@ -68,7 +69,11 @@ public class WeatherService {
         }
 
         try {
-            String urlApi = String.format("%s%s&q=%s&days=%d&lang=pt", apiUrl, apiKey, cidadeFormatada, dias);
+            CoordinationDto coordinationDto = latAndLong(cidade, regiao, pais);
+
+            String coordenada = String.format("%s,%s", coordinationDto.latitude(), coordinationDto.longitude());
+
+            String urlApi = String.format("%s%s&q=%s&days=%d&lang=pt", apiUrl, apiKey, coordenada, dias);
             DadosWeather apiWeather = restTemplate.getForObject(urlApi, DadosWeather.class);
 
             if (apiWeather == null || apiWeather.foreCast() == null) {throw new NotFoundException("Nenhum dado encontrado para a cidade: " + cidade);}
@@ -91,7 +96,7 @@ public class WeatherService {
                                 .build());
             }
 
-            weatherRepository.deleteByCidadeIgnoreCase(cidadeFormatoBanco);
+            weatherRepository.deleteByCidadeIgnoreCase(cidadeFormatada);
             weatherRepository.saveAll(weatherDtoList.stream().map(Weather::new).toList());
 
             return weatherDtoList;
@@ -105,12 +110,13 @@ public class WeatherService {
     }
 
     @Transactional
-    public WeatherNowDto weatherNow(String cidade) {
+    public WeatherNowDto weatherNow(String cidade, String regiao, String pais) {
 
-        String cidadeFormatada = cidade.toLowerCase().replace(" ", "_").trim();
-        String cidadeFormatoBanco = cidade.toLowerCase().replace("_", " ").trim();
+        String cidadeFormatada = formatoBanco(cidade);
+        String regiaoFormatada = formatoBanco(regiao);
+        String paisFormatado = formatoBanco(pais);
 
-        Optional<WeatherNow> weatherNowOptional = weatherNowRepository.findByCidadeIgnoreCase(cidadeFormatoBanco);
+        Optional<WeatherNow> weatherNowOptional = weatherNowRepository.findAllByCidadeAndRegiaoAndPaisIgnoreCase(cidadeFormatada, regiaoFormatada, paisFormatado);
 
         Instant umaHoraAtras = Instant.now().minus(1, ChronoUnit.HOURS);
 
@@ -122,11 +128,15 @@ public class WeatherService {
         }
 
         try {
-            String url = String.format("%s%s&lang=pt", apiUrlNow, cidadeFormatada);
+            CoordinationDto coordinationDto = latAndLong(cidade, regiao, pais);
+
+            String coordenada = String.format("%s,%s", coordinationDto.latitude(), coordinationDto.longitude());
+
+            String url = String.format("%s%s&lang=pt", apiUrlNow, coordenada);
             DadosWeatherNow api = restTemplate.getForObject(url, DadosWeatherNow.class);
 
             if(api == null) {
-                throw new NotFoundException("Nenhum dado encontrado para a cidade: " + cidadeFormatada);
+                throw new NotFoundException("Nenhum dado encontrado para a cidade: " + cidade);
             }
 
             String diaDaSemana = api.location().dataEHorario().getDayOfWeek().getDisplayName(TextStyle.FULL, locale);
@@ -146,20 +156,38 @@ public class WeatherService {
         }
     }
 
+    public List<CoordinationDto> fetchCoordination(String cidade, String notFoundMessage) {
+        String url = apiUrlCoordination + cidade;
+        DadosCoordination[] dados = restTemplate.getForObject(url, DadosCoordination[].class);
+
+        if (dados == null) {
+            throw new NotFoundException(notFoundMessage);
+        }
+
+        List<DadosCoordination> dadosCoordinationList = Arrays.asList(dados);
+        return dadosCoordinationList.stream().map(CoordinationDto::new).toList();
+
+
+    }
+
     public List<CoordinationDto> getCoordination(String cidade) {
 
         String cidadeFormatada = cidade.toLowerCase().replace(" ", "_").trim();
+        return fetchCoordination(cidadeFormatada, "Nenhum dado foi encontrado para a cidade: " + cidade);
+    }
 
-        String url = apiUrlCoordination + cidadeFormatada;
-        DadosCoordination[] coordination = restTemplate.getForObject(url, DadosCoordination[].class);
+    private CoordinationDto latAndLong(String cidade, String regiao, String pais) {
+        List<CoordinationDto> coordination = getCoordination(cidade).stream()
+                .filter(city -> city.cidade().equalsIgnoreCase(cidade))
+                .filter(region -> region.regiao().equalsIgnoreCase(regiao))
+                .filter(country -> country.pais().equalsIgnoreCase(pais))
+                .toList();
 
-        if (coordination == null) {
-            throw new NotFoundException("Nenhum dado encontrado para a cidade: " + cidade);
-        }
+        return coordination.get(0);
+    }
 
-        List<DadosCoordination> dadosCoordinationList = Arrays.asList(coordination);
-
-        return dadosCoordinationList.stream().map(CoordinationDto::new).toList();
+    public List<CoordinationDto> search(String q) {
+        return fetchCoordination(q, "Nenhum dado foi encontrado.");
     }
 
     public List<WeatherDto> findAll() {
@@ -170,4 +198,7 @@ public class WeatherService {
         return weatherNowRepository.findAll().stream().map(WeatherNowDto::new).toList();
     }
 
+    private String formatoBanco(String txt) {
+        return txt.replace(" ", "_").trim();
+    }
 }

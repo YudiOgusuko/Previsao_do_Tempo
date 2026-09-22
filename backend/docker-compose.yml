@@ -26,7 +26,7 @@ services:
     container_name: previsao_do_tempo_app
     restart: unless-stopped
     ports:
-      - "8085:8080"
+      - "8080:8080"
     env_file:
       - .env
     environment:
