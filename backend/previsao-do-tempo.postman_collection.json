@@ -1,0 +1,172 @@
+{
+	"info": {
+		"name": "Previsão do Tempo",
+		"description": "Exemplos de requisições da API do projeto Previsão do Tempo (backend Java + WeatherAPI). Importe este arquivo no Postman, Insomnia ou Bruno.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{ "key": "base_url", "value": "http://localhost:8080/api/clima" }
+	],
+	"item": [
+		{
+			"name": "Cidade",
+			"item": [
+				{
+					"name": "Buscar cidades (autocomplete) - São",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/search?q=São",
+							"host": ["{{base_url}}"],
+							"path": ["search"],
+							"query": [{ "key": "q", "value": "São" }]
+						}
+					}
+				},
+				{
+					"name": "Buscar cidades (autocomplete) - Paris",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/search?q=Paris",
+							"host": ["{{base_url}}"],
+							"path": ["search"],
+							"query": [{ "key": "q", "value": "Paris" }]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Previsão da Semana",
+			"item": [
+				{
+					"name": "Previsão 3 dias - São Paulo",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}?cidade=-23.5505,-46.6333&dias=3",
+							"host": ["{{base_url}}"],
+							"query": [
+								{ "key": "cidade", "value": "-23.5505,-46.6333" },
+								{ "key": "dias", "value": "3" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Previsão 7 dias - São Paulo",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}?cidade=-23.5505,-46.6333&dias=7",
+							"host": ["{{base_url}}"],
+							"query": [
+								{ "key": "cidade", "value": "-23.5505,-46.6333" },
+								{ "key": "dias", "value": "7" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Previsão 14 dias (máximo) - Tóquio",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}?cidade=35.6762,139.6503&dias=14",
+							"host": ["{{base_url}}"],
+							"query": [
+								{ "key": "cidade", "value": "35.6762,139.6503" },
+								{ "key": "dias", "value": "14" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Erro - cidade vazia",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}?cidade=&dias=3",
+							"host": ["{{base_url}}"],
+							"query": [
+								{ "key": "cidade", "value": "" },
+								{ "key": "dias", "value": "3" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Erro - dias acima do limite (15)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}?cidade=-23.5505,-46.6333&dias=15",
+							"host": ["{{base_url}}"],
+							"query": [
+								{ "key": "cidade", "value": "-23.5505,-46.6333" },
+								{ "key": "dias", "value": "15" }
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Clima Atual",
+			"item": [
+				{
+					"name": "Clima atual - São Paulo",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/now?cidade=-23.5505,-46.6333",
+							"host": ["{{base_url}}"],
+							"path": ["now"],
+							"query": [{ "key": "cidade", "value": "-23.5505,-46.6333" }]
+						}
+					}
+				},
+				{
+					"name": "Clima atual - Londres",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/now?cidade=51.5074,-0.1278",
+							"host": ["{{base_url}}"],
+							"path": ["now"],
+							"query": [{ "key": "cidade", "value": "51.5074,-0.1278" }]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Histórico salvo (Postgres)",
+			"item": [
+				{
+					"name": "Listar todas as previsões salvas",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/all",
+							"host": ["{{base_url}}"],
+							"path": ["all"]
+						}
+					}
+				},
+				{
+					"name": "Listar todos os climas atuais salvos",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/all/now",
+							"host": ["{{base_url}}"],
+							"path": ["all", "now"]
+						}
+					}
+				}
+			]
+		}
+	]
+}

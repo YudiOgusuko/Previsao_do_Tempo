@@ -3,6 +3,7 @@ package br.Previsao_do_Tempo.controller;
 import br.Previsao_do_Tempo.dto.CoordinationDto;
 import br.Previsao_do_Tempo.dto.WeatherDto;
 import br.Previsao_do_Tempo.dto.WeatherNowDto;
+import br.Previsao_do_Tempo.dto.dadosCoordination.DadosCoordination;
 import br.Previsao_do_Tempo.sevice.WeatherService;
 import jakarta.validation.constraints.*;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,6 @@ public class WeatherController {
             @NotBlank(message = "O nome da cidade não pode estar em branco.")
             @Size(min = 1, max = 58, message = "O nome da cidade deve ter entre 1 e 58 caracteres.")
             String cidade,
-
             @RequestParam
             @NotNull(message = "O número de dias não pode estar em branco.")
             @Min(value = 1, message = "O número mínimo de dias é 1.")
@@ -54,6 +54,11 @@ public class WeatherController {
             @Size(min = 1, max = 85, message = "O nome da cidade deve ter entre 1 e 58 caracteres.")
             String cidade) {
         return ResponseEntity.ok().body(service.getCoordination(cidade));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<CoordinationDto>> search(@RequestParam @NotBlank String q) {
+        return ResponseEntity.ok(service.search(q));
     }
 
     @GetMapping(value = "/all")

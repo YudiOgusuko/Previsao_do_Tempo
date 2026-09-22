@@ -10,7 +10,7 @@ RUN mvn clean package -DskipTests -B
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
-ARG PORT=8085
+ARG PORT=8080
 ENV PORT=${PORT}
 EXPOSE ${PORT}
 

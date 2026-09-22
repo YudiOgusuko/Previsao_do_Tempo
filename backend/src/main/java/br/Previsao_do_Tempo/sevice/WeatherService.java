@@ -162,6 +162,19 @@ public class WeatherService {
         return dadosCoordinationList.stream().map(CoordinationDto::new).toList();
     }
 
+    public List<CoordinationDto> search(String q) {
+
+        String url = apiUrlCoordination + q;
+        DadosCoordination[] dadosCoordinations = restTemplate.getForObject(url, DadosCoordination[].class);
+
+        if(dadosCoordinations == null) {
+            throw new NotFoundException("Nenhum dado foi encontrado.");
+        }
+
+        List<DadosCoordination> dadosCoordinationList = Arrays.asList(dadosCoordinations);
+        return dadosCoordinationList.stream().map(CoordinationDto::new).toList();
+    }
+
     public List<WeatherDto> findAll() {
         return weatherRepository.findAll().stream().map(WeatherDto::new).toList();
     }
@@ -169,5 +182,4 @@ public class WeatherService {
     public List<WeatherNowDto> findAllNow() {
         return weatherNowRepository.findAll().stream().map(WeatherNowDto::new).toList();
     }
-
 }
